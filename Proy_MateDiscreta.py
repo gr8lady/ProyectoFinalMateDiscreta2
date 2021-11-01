@@ -6,7 +6,7 @@ usuarioAdmin = 'root'
 passwordAdmin = 'toor'
 
 archivo_usuarios = 'usuarios.json'
-archivo_grafos = 'grafos.json'
+archivo_grafos = 'grafos.csv'
 
 #objeto grafo
 G = nx.Graph()
@@ -15,7 +15,8 @@ labels = {}
 #JSON USER EXAMPLE
 #[{"usuario": "root","password":"toor","tipo":"0"},{"usuario": "herlich","password":"password","tipo":"1"}]
 
-
+#archivo grafos
+#nombre_origen,nombre_destino,kms
 
 
 #PROCESOS DE USUARIOS
@@ -75,6 +76,7 @@ def menuAdmin():
         print('5. agregar alertas')
         print('6. Log de actividad')
         print('7. ver sitios y carreteras ingresados ')
+        print('8. ruta mas corta')
         print('10. salir')
 
         try:
@@ -88,8 +90,13 @@ def menuAdmin():
             agregaNodo()
         if (opcion == 3):
             agregarCarretera()
+        if (opcion == 4):
+            borrarCarretera()
         if (opcion == 7):
             verGrafo()
+        if (opcion ==8):
+            rutaMasCorta()
+        salvarGrafos()            
 
 def menu():
     opcion = 0
@@ -105,52 +112,86 @@ def menu():
             print("No es un nummero valido")
 
 #PROCESOS GRAFOS
+
+def rutaMasCorta():
+    origen = str(input('Ingrese Nodo Origen:'))
+    destino = str(input('Ingrese Nodo Destino:'))
+    print (nx.shortest_path(G, source=origen, target=destino, weight=None, method='dijkstra'))
+    
+            
 def agregaNodo():
-    numNodo = 0
     try:
-        numNodo = int(input('Ingrese Numero del Nodo:'))
         etiqueta = str(input('Ingrese Nombre del Nodo:'))
-        G.add_node(numNodo)
-        labels[numNodo] = etiqueta
+        G.add_node(etiqueta)
     except ValueError:
-        print("No es un nummero valido")
+        print("No es un dato valido")
 
 
 def verGrafo():
     print(G.nodes())
-    print(G.edges())
+    print(G.edges(data=True))
     print(labels)
-
-    pos=nx.spring_layout(G)
-    nx.draw_networkx_nodes(G, pos) 
-    nx.draw_networkx_edges(G, pos) 
-    nx.draw_networkx_labels(G, pos, labels, font_size=16)    
-    #nx.draw(G,with_labels=True)
+   
+    nx.draw(G,with_labels=True)
     plt.savefig("graph.png")
     plt.show()
 
 def agregarCarretera():
-    origen = 0
-    destino = 0
     try:
-        origen = int(input('Ingrese Nodo Origen:'))
-        destino = int(input('Ingrese Nodo Destino:'))
-        G.add_edge(origen,destino)
+        origen = str(input('Ingrese Nodo Origen:'))
+        destino = str(input('Ingrese Nodo Destino:'))
+        peso = int(input('Ingrese peso del Nodo:'))
+        G.add_edge(origen,destino,weight = peso)
+        
     except ValueError:
         print("No es un nummero valido")
 
+def borrarCarretera():
+    try:
+        origen = str(input('Ingrese Nodo Origen:'))
+        destino = str(input('Ingrese Nodo Destino:'))
+        peso = int(input('Ingrese peso del Nodo:'))
+        G.remove_edge(origen,destino,weight = peso)
+        
+    except ValueError:
+        print("No es un nummero valido")
     
+
+def salvarGrafos():
+    print('salvando grafos')
+    g = G.edges(data=True)
+    #print(g)
+    arch = open(archivo_grafos, "w")
+    for n in g:
+        origen = n[0]
+        destino = n[1]
+        peso = n[2]['weight']
+        arch.write(origen + ',' + destino + ',' + str(peso) + '\n')
+    arch.close()     
+
+def cargaArchivoGrafos():
+    try:
+        file1 = open(archivo_grafos, 'r')
+        Lines = file1.readlines()
+        for line in Lines:
+            x = line.replace('\n','').split(',')
+            print(x)
+            if (len(x)>0):
+                #print(line,x[0],x[1],x[2])
+                G.add_edge(x[0],x[1],weight = int(x[2]))
+    except:
+        print('hay un problema con el archivo de grafos')
 
 #void main()
 if __name__ == '__main__':
     print("starting")
-    usuarios = leerDataUsr()
-    #TODO LEER GRAFOS
-
-    print('ingrese usuario')
-    usr = str(input('Ingrese Opcion:'))
-    print('ingrese password')
-    pwd = str(input('Ingrese Opcion:'))
+    usuarios = leerDataUsr()#cargamos usuarios
+    cargaArchivoGrafos()#cargamos grafos
+    
+   # print('ingrese usuario')
+    usr = str(input('Ingrese usuario:'))
+    #print('ingrese password')
+    pwd = str(input('Ingrese password:'))
     
 
     if ((usr == usuarioAdmin) and (pwd == passwordAdmin)):
