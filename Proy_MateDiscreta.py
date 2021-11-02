@@ -1,6 +1,10 @@
+#si se trabaja en windows hay que instalar los headers y compiladores de c y c++ desde este link Microsoft C++ Build Tools": https://visualstudio.microsoft.com/visual-cpp-build-tools/
+# luego se instalan las librerias usando pip como se muestra en la descripcion de las librerias. 
 import json
 import networkx as nx #pip install networkx
 import matplotlib.pyplot as plt #pip install matplotlib
+from datetime import datetime
+
 
 usuarioAdmin = 'root'
 passwordAdmin = 'toor'
@@ -13,11 +17,15 @@ G = nx.Graph()
 labels = {}
 
 #JSON USER EXAMPLE
-#[{"usuario": "root","password":"toor","tipo":"0"},{"usuario": "herlich","password":"password","tipo":"1"}]
+#[{"usuario": "root","password":"toor","tipo":"0"},{"usuario": "User","password":"password","tipo":"1"}]
 
 #archivo grafos
 #nombre_origen,nombre_destino,kms
-
+def salvarLog(usuario,mensajeLog):
+    now = datetime.now()
+    arch = open('log.csv', "a")
+    arch.write(usuario + ',' + mensajeLog + ',' + str(now) + '\n')
+    arch.close()
 
 #PROCESOS DE USUARIOS
 def leerDataUsr():
@@ -25,28 +33,31 @@ def leerDataUsr():
     try:
         file = open(archivo_usuarios,mode='r')
         usuarios = json.loads( str(file.read()))
-        print (usuarios)
+      #  print (usuarios)  
         file.close()
         return usuarios
     except:
         print('no hay archivo de usuarios o usuarios todavia')
+        salvarLog(usuarioAdmin,'error: no hay usuarios creados o el archivo esta vacio.')
         return []
 
 
 def addUserJson():
-    print('ingrese usuario')
-    usr = str(input('Ingrese Opcion:'))
-    print('ingrese password')
-    pwd = str(input('Ingrese Opcion:'))
+#funcion que agrega un usuario 
+    usr = str(input('Ingrese nonbre del usuario:'))
+    pwd = str(input('Ingrese password:'))
     usuarios.append( {"usuario": usr, "password": pwd, "tipo": "1"})
     print(usuarios)
     if ( buscaUsuario(usr,pwd) == False ):
         grabarUsuarios()
+        salvarLog(usuarioAdmin,'info: el usuario ha sido creado.')
     else:
         print('usuario ya existe')
+        salvarLog(usuarioAdmin,'warn: el usuario ya existe.')
 
 
 def grabarUsuarios():
+# funcion que guarda los usuarios en un archivo de texto json
     print('grabando usuarios cuando hay algun cambio')
     print(str(usuarios))
     arch = open(archivo_usuarios, "w")
@@ -55,6 +66,7 @@ def grabarUsuarios():
 
 
 def buscaUsuario(usr,pwd):
+#buscamos los usuarios en el archivo cargando el json
     encontrado = False;
     for attrs in usuarios:
         if (attrs['usuario'] == usr and attrs['password'] == pwd):
@@ -62,7 +74,8 @@ def buscaUsuario(usr,pwd):
             encontrado = True
             break
     else:
-        print('Nothing found!')
+        print('El usuario no se ha encontrado')
+        salvarLog(usuarioAdmin, usr +'error: no se ha encontrado el usuario.')
     return encontrado
 
 #PROCESOS MENU    
@@ -99,6 +112,7 @@ def menuAdmin():
         salvarGrafos()            
 
 def menu():
+# este es el menu del usuario que no es admin 
     opcion = 0
     while (opcion != 5):
         print('1. ingresar sitio turistico a visitar')
@@ -110,21 +124,41 @@ def menu():
             opcion = int(input('Ingrese Opcion:'))
         except ValueError:
             print("No es un nummero valido")
+        if (opcion == 1):
+            rutaMasCorta()
+       
 
 #PROCESOS GRAFOS
 
 def rutaMasCorta():
     origen = str(input('Ingrese Nodo Origen:'))
     destino = str(input('Ingrese Nodo Destino:'))
-    print (nx.shortest_path(G, source=origen, target=destino, weight=None, method='dijkstra'))
+    path = nx.shortest_path(G, source=origen, target=destino, weight=None, method='dijkstra')
+    print ('ruta mas corta: ',path,' con un total de sitios a recorrer: ', len(path))
+    salvarLog(usr,'info: se ha mostrado la ruta mas corta.')
+    kms = 0
+    G2 = nx.Graph()
     
+    for x in range(len(path)-1):
+        print('ruta: ',path[x], path[x + 1],' kilometros: ' ,G[path[x]][path[x + 1]]["weight"])
+        kms = kms + G[path[x]][path[x + 1]]["weight"]
+        #creamos ruta 
+        G2.add_edge(path[x],path[x + 1],weight = G[path[x]][path[x + 1]]["weight"])
+    print('kilometros totales a recorrer: ',kms)
+    salvarLog(usr,'info: se han mostrado los kilometros a recorrer.')
+    #mostramos la ruta
+    nx.draw(G2,with_labels=True)
+    plt.savefig("graph2.png")
+    plt.show()   
             
+        
 def agregaNodo():
     try:
-        etiqueta = str(input('Ingrese Nombre del Nodo:'))
+        etiqueta = str(input('Ingrese Nombre del Sitio Turistico:'))
         G.add_node(etiqueta)
     except ValueError:
         print("No es un dato valido")
+        salvarLog(usr,'error: ha ingresado un dato no valido.')
 
 
 def verGrafo():
@@ -140,7 +174,7 @@ def agregarCarretera():
     try:
         origen = str(input('Ingrese Nodo Origen:'))
         destino = str(input('Ingrese Nodo Destino:'))
-        peso = int(input('Ingrese peso del Nodo:'))
+        peso = int(input('Ingrese la distancia en kilometros:'))
         G.add_edge(origen,destino,weight = peso)
         
     except ValueError:
@@ -150,14 +184,16 @@ def borrarCarretera():
     try:
         origen = str(input('Ingrese Nodo Origen:'))
         destino = str(input('Ingrese Nodo Destino:'))
-        peso = int(input('Ingrese peso del Nodo:'))
+        peso = int(input('Ingrese peso del kilometros:'))
         G.remove_edge(origen,destino,weight = peso)
         
     except ValueError:
         print("No es un nummero valido")
+        salvarLog(usr,'error: ha ingresado un dato no valido.')
     
 
 def salvarGrafos():
+#grava los datos en un archivo csv que fueron cargados
     print('salvando grafos')
     g = G.edges(data=True)
     #print(g)
@@ -181,16 +217,14 @@ def cargaArchivoGrafos():
                 G.add_edge(x[0],x[1],weight = int(x[2]))
     except:
         print('hay un problema con el archivo de grafos')
+        salvarLog(usr,'error: existe un problema con el archivo de grafos.')
 
 #void main()
 if __name__ == '__main__':
     print("starting")
     usuarios = leerDataUsr()#cargamos usuarios
     cargaArchivoGrafos()#cargamos grafos
-    
-   # print('ingrese usuario')
     usr = str(input('Ingrese usuario:'))
-    #print('ingrese password')
     pwd = str(input('Ingrese password:'))
     
 
@@ -202,4 +236,20 @@ if __name__ == '__main__':
         else:
             print('usuario o password no valido')
     
+
+
+def despliegaLog():
+    usrBuscar = str(input('Ingrese usuario a desplegar:'))
+    try:
+        file1 = open('log.csv', 'r')
+        Lines = file1.readlines()
+        for line in Lines:
+            x = line.replace('\n','').split(',')
+            if (len(x) > 0 and x[0] == usrBuscar):
+                print(line)
+    except:
+        print('hay un problema con el archivo de log')
+
+
+
     
