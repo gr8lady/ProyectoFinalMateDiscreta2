@@ -4,17 +4,21 @@ import json
 import networkx as nx #pip install networkx
 import matplotlib.pyplot as plt #pip install matplotlib
 from datetime import datetime
-
+import math
 
 usuarioAdmin = 'root'
 passwordAdmin = 'toor'
 
 archivo_usuarios = 'usuarios.json'
 archivo_grafos = 'grafos.csv'
+archivo_contador = 'contador.json'
 
 #objeto grafo
 G = nx.Graph()
 labels = {}
+
+VALORBANDERA = 10000
+CONTADOR = []
 
 #JSON USER EXAMPLE
 #[{"usuario": "root","password":"toor","tipo":"0"},{"usuario": "User","password":"password","tipo":"1"}]
@@ -100,9 +104,11 @@ def menuAdmin():
             agregarCarretera()
         if (opcion == 4):
             borrarCarretera()
+        if (opcion == 5):
+            agregarCarreteraBandera()
         if (opcion == 7):
             verGrafo()
-        if (opcion ==8):
+        if (opcion == 8):
             rutaMasCorta()
         salvarGrafos()            
 
@@ -123,18 +129,61 @@ def menu():
             rutaMasCorta()
        
 
+
+def leerDataContador():
+    #leer json con usuarios
+    try:
+        file = open(archivo_contador,mode='r')
+        c = json.loads( str(file.read()))
+        print (c)  
+        file.close()
+        return c
+    except:
+        print('no hay archivo de contador')
+        return []
+
+def addContadorJson(sitio):
+#funcion que agrega un usuario 
+    CONTADOR.append( {"sitio": sitio, "contador":  0})
+    #print(CONTADOR)
+
+def grabarContador():
+# funcion que guarda los usuarios en un archivo de texto json
+    print('grabando contador')
+    arch = open(archivo_contador, "w")
+    arch.write(str(CONTADOR).replace("'",'\"'))
+    arch.close()   
+
+def incrementarContador(destino):
+#buscamos los usuarios en el archivo cargando el json
+    for attrs in CONTADOR:
+        if (attrs['sitio'] == destino):
+            print('encontrado')
+            #encontrado = True
+            x = attrs['contador']
+            x = x + 1
+            attrs['contador']  = x
+            break
+    print(CONTADOR)
+
 #PROCESOS GRAFOS
 
 def rutaMasCorta():
     origen = str.upper(input('Ingrese Nodo Origen:'))
     destino = str.upper(input('Ingrese Nodo Destino:'))
+    incrementarContador(destino)
     path = nx.shortest_path(G, source=origen, target=destino, weight=None, method='dijkstra')
     print ('ruta mas corta: ',path,' con un total de sitios a recorrer: ', len(path))
     salvarLog(usr,'info: se ha mostrado la ruta mas corta.')
     kms = 0
     G2 = nx.Graph()
-    
+    alerta = False;
     for x in range(len(path)-1):
+        if (G[path[x]][path[x + 1]]["weight"] == VALORBANDERA):
+            print('*****************************')
+            print('en esta ruta hay una alerta')
+            print('ruta: ',path[x], path[x + 1],' kilometros: ' ,G[path[x]][path[x + 1]]["weight"])
+            print('*****************************')
         print('ruta: ',path[x], path[x + 1],' kilometros: ' ,G[path[x]][path[x + 1]]["weight"])
         kms = kms + G[path[x]][path[x + 1]]["weight"]
         #creamos ruta 
@@ -158,6 +207,8 @@ def agregarCarretera1(etiqueta):
         print("No es un nummero valido")
 
 
+
+
 def agregarCarretera():
     try:
         origen = str.upper(input('Ingrese sitio origen:'))
@@ -168,11 +219,24 @@ def agregarCarretera():
     except ValueError:
         print("No es un nummero valido")
 
+
+def agregarCarreteraBandera():
+    try:
+        origen = str.upper(input('Ingrese sitio origen:'))
+        destino = str.upper(input('Ingrese sitio destino:'))
+        peso = VALORBANDERA#int(input('Ingrese la distancia en kilometros:'))
+        G.add_edge(origen,destino,weight = peso)
+        
+    except ValueError:
+        print("No es un nummero valido")
+
+
 def agregaNodo():
     try:
         etiqueta = str.upper(input('Ingrese Nombre del Sitio Turistico:'))
         G.add_node(etiqueta)
-        agregarCarretera1(etiqueta)
+       # agregarCarretera1(etiqueta)
+        addContadorJson(etiqueta)
     except ValueError:
         print("No es un dato valido")
         salvarLog(usr,'error: ha ingresado un dato no valido.')
@@ -213,39 +277,6 @@ def salvarGrafos():
         arch.write(origen + ',' + destino + ',' + str(peso) + '\n')
     arch.close()     
 
-def cargaArchivoGrafos():
-    try:
-        file1 = open(archivo_grafos, 'r')
-        Lines = file1.readlines()
-        for line in Lines:
-            x = line.replace('\n','').split(',')
-            print(x)
-            if (len(x)>0):
-                #print(line,x[0],x[1],x[2])
-                G.add_edge(x[0],x[1],weight = int(x[2]))
-    except:
-        print('hay un problema con el archivo de grafos')
-        salvarLog(usr,'error: existe un problema con el archivo de grafos.')
-
-#void main()
-if __name__ == '__main__':
-    print("starting")
-    usuarios = leerDataUsr()#cargamos usuarios
-    cargaArchivoGrafos()#cargamos grafos
-    usr = str(input('Ingrese usuario:'))
-    pwd = str(input('Ingrese password:'))
-    
-
-    if ((usr == usuarioAdmin) and (pwd == passwordAdmin)):
-        menuAdmin()
-    else:
-        if (buscaUsuario(usr,pwd)):
-            menu()
-        else:
-            print('usuario o password no valido')
-    
-
-
 def despliegaLog():
     usrBuscar = str(input('Ingrese usuario a desplegar:'))
     try:
@@ -259,5 +290,40 @@ def despliegaLog():
         print('hay un problema con el archivo de log')
 
 
+def cargaArchivoGrafos():
+    try:
+        file1 = open(archivo_grafos, 'r')
+        Lines = file1.readlines()
+        for line in Lines:
+            x = line.replace('\n','').split(',')
+            print(x)
+            if (len(x)>0):
+                #print(line,x[0],x[1],x[2])
+                G.add_edge(x[0],x[1],weight = int(x[2]))
+                    
+    except:
+        print('hay un problema con el archivo de grafos')
+       # salvarLog(usr,'error: existe un problema con el archivo de grafos.')
 
+
+
+#void main()
+if __name__ == '__main__':
+    print("starting")
+    usuarios = leerDataUsr()#cargamos usuarios
+    CONTADOR = leerDataContador()
+    cargaArchivoGrafos()#cargamos grafos
+    usr = str(input('Ingrese usuario:'))
+    pwd = str(input('Ingrese password:'))
     
+    if ((usr == usuarioAdmin) and (pwd == passwordAdmin)):
+        menuAdmin()
+    else:
+        if (buscaUsuario(usr,pwd)):
+            menu()
+        else:
+            print('usuario o password no valido')
+    #print(CONTADOR)    
+    grabarContador()
+    
+
