@@ -38,7 +38,6 @@ def leerDataUsr():
         return usuarios
     except:
         print('no hay archivo de usuarios o usuarios todavia')
-        salvarLog(usuarioAdmin,'error: no hay usuarios creados o el archivo esta vacio.')
         return []
 
 
@@ -50,11 +49,8 @@ def addUserJson():
     print(usuarios)
     if ( buscaUsuario(usr,pwd) == False ):
         grabarUsuarios()
-        salvarLog(usuarioAdmin,'info: el usuario ha sido creado.')
     else:
         print('usuario ya existe')
-        salvarLog(usuarioAdmin,'warn: el usuario ya existe.')
-
 
 def grabarUsuarios():
 # funcion que guarda los usuarios en un archivo de texto json
@@ -75,7 +71,6 @@ def buscaUsuario(usr,pwd):
             break
     else:
         print('El usuario no se ha encontrado')
-        salvarLog(usuarioAdmin, usr +'error: no se ha encontrado el usuario.')
     return encontrado
 
 #PROCESOS MENU    
@@ -87,7 +82,7 @@ def menuAdmin():
         print('3. Agregar carreteras')
         print('4. remover carretera')
         print('5. agregar alertas')
-        print('6. Log de actividad')
+        print('6. log de estadisticas sitios turisticos')
         print('7. ver sitios y carreteras ingresados ')
         print('8. ruta mas corta')
         print('10. salir')
@@ -131,8 +126,8 @@ def menu():
 #PROCESOS GRAFOS
 
 def rutaMasCorta():
-    origen = str(input('Ingrese Nodo Origen:'))
-    destino = str(input('Ingrese Nodo Destino:'))
+    origen = str.upper(input('Ingrese Nodo Origen:'))
+    destino = str.upper(input('Ingrese Nodo Destino:'))
     path = nx.shortest_path(G, source=origen, target=destino, weight=None, method='dijkstra')
     print ('ruta mas corta: ',path,' con un total de sitios a recorrer: ', len(path))
     salvarLog(usr,'info: se ha mostrado la ruta mas corta.')
@@ -151,11 +146,33 @@ def rutaMasCorta():
     plt.savefig("graph2.png")
     plt.show()   
             
+
+def agregarCarretera1(etiqueta):
+    try:
+        origen = str.upper(input('Ingrese sitio origen:'))
+        destino = etiqueta
+        peso = int(input('Ingrese la distancia en kilometros:'))
+        G.add_edge(origen,destino,weight = peso)
         
+    except ValueError:
+        print("No es un nummero valido")
+
+
+def agregarCarretera():
+    try:
+        origen = str.upper(input('Ingrese sitio origen:'))
+        destino = str.upper(input('Ingrese sitio destino:'))
+        peso = int(input('Ingrese la distancia en kilometros:'))
+        G.add_edge(origen,destino,weight = peso)
+        
+    except ValueError:
+        print("No es un nummero valido")
+
 def agregaNodo():
     try:
-        etiqueta = str(input('Ingrese Nombre del Sitio Turistico:'))
+        etiqueta = str.upper(input('Ingrese Nombre del Sitio Turistico:'))
         G.add_node(etiqueta)
+        agregarCarretera1(etiqueta)
     except ValueError:
         print("No es un dato valido")
         salvarLog(usr,'error: ha ingresado un dato no valido.')
@@ -170,15 +187,6 @@ def verGrafo():
     plt.savefig("graph.png")
     plt.show()
 
-def agregarCarretera():
-    try:
-        origen = str(input('Ingrese Nodo Origen:'))
-        destino = str(input('Ingrese Nodo Destino:'))
-        peso = int(input('Ingrese la distancia en kilometros:'))
-        G.add_edge(origen,destino,weight = peso)
-        
-    except ValueError:
-        print("No es un nummero valido")
 
 def borrarCarretera():
     try:
