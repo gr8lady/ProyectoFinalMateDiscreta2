@@ -106,6 +106,8 @@ def menuAdmin():
             borrarCarretera()
         if (opcion == 5):
             agregarCarreteraBandera()
+        if (opcion == 6):
+            leerDataContador()
         if (opcion == 7):
             verGrafo()
         if (opcion == 8):
@@ -196,26 +198,13 @@ def rutaMasCorta():
     plt.show()   
             
 
-def agregarCarretera1(etiqueta):
-    try:
-        origen = str.upper(input('Ingrese sitio origen:'))
-        destino = etiqueta
-        peso = int(input('Ingrese la distancia en kilometros:'))
-        G.add_edge(origen,destino,weight = peso)
-        
-    except ValueError:
-        print("No es un nummero valido")
-
-
-
-
 def agregarCarretera():
     try:
         origen = str.upper(input('Ingrese sitio origen:'))
         destino = str.upper(input('Ingrese sitio destino:'))
         peso = int(input('Ingrese la distancia en kilometros:'))
         G.add_edge(origen,destino,weight = peso)
-        
+        salvarGrafos() 
     except ValueError:
         print("No es un nummero valido")
 
@@ -235,7 +224,6 @@ def agregaNodo():
     try:
         etiqueta = str.upper(input('Ingrese Nombre del Sitio Turistico:'))
         G.add_node(etiqueta)
-       # agregarCarretera1(etiqueta)
         addContadorJson(etiqueta)
     except ValueError:
         print("No es un dato valido")
@@ -254,11 +242,13 @@ def verGrafo():
 
 def borrarCarretera():
     try:
-        origen = str(input('Ingrese Nodo Origen:'))
-        destino = str(input('Ingrese Nodo Destino:'))
+        origen = str.upper(input('Ingrese Nodo Origen:'))
+        destino = str.upper(input('Ingrese Nodo Destino:'))
         peso = int(input('Ingrese peso del kilometros:'))
-        G.remove_edge(origen,destino,weight = peso)
-        
+       # G.remove_edge(origen,destino,weight = peso)
+        G.remove_edge(origen,destino)
+        G.remove_node(destino)
+        salvarGrafos()
     except ValueError:
         print("No es un nummero valido")
         salvarLog(usr,'error: ha ingresado un dato no valido.')
