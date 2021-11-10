@@ -1,11 +1,11 @@
 #si se trabaja en windows hay que instalar los headers y compiladores de c y c++ desde este link Microsoft C++ Build Tools": https://visualstudio.microsoft.com/visual-cpp-build-tools/
 # luego se instalan las librerias usando pip como se muestra en la descripcion de las librerias. 
 import json
+from typing import Any
 import networkx as nx #pip install networkx
 import matplotlib.pyplot as plt #pip install matplotlib
 from datetime import datetime
 import math
-
 usuarioAdmin = 'root'
 passwordAdmin = 'toor'
 
@@ -20,10 +20,31 @@ labels = {}
 VALORBANDERA = 10000
 CONTADOR = []
 
+#[{"sitio": "GUATEMALA", "contador": 0}, {"sitio": "SALVADOR", "contador": 1}, {"sitio": "SOLOLA", "contador": 5}]
+
+            
+
+
+def buscaSitio(sitioBuscar):
+    print('buscando sitio turistico', sitioBuscar)
+    encontrado = False
+    for attrs in CONTADOR:
+        if (attrs['sitio'] == sitioBuscar):
+            print('encontrado')
+            encontrado = True
+            break
+    #print(encontrado)
+    return encontrado
+
+
+
+
 #JSON USER EXAMPLE
 #[{"usuario": "root","password":"toor","tipo":"0"},{"usuario": "User","password":"password","tipo":"1"}]
 
 #archivo grafos
+
+
 #nombre_origen,nombre_destino,kms
 def salvarLog(usuario,mensajeLog):
     now = datetime.now()
@@ -90,7 +111,6 @@ def menuAdmin():
         print('7. ver sitios y carreteras ingresados ')
         print('8. ruta mas corta')
         print('10. salir')
-
         try:
             opcion = int(input('Ingrese Opcion:'))
         except ValueError:
@@ -118,26 +138,30 @@ def menu():
 # este es el menu del usuario que no es admin 
     opcion = 0
     while (opcion != 5):
-        print('1. ingresar sitio turistico a visitar')
+        print('1. obtener ruta del turistico a visitar')
         print('2. obtener ruta mas corta')
-        print('3. mostrar cantidad de kms')
-        print('4. ver alertas')
+        print('4. ver todas las rutas')
         print('5. salir')
         try:
             opcion = int(input('Ingrese Opcion:'))
         except ValueError:
             print("No es un nummero valido")
         if (opcion == 1):
+            agregaNodoUsuario()
+        if (opcion == 2):
             rutaMasCorta()
+        if (opcion == 4):
+            verGrafo()
        
 
-
 def leerDataContador():
-    #leer json con usuarios
+    #leer json con el data de estadisticas
     try:
         file = open(archivo_contador,mode='r')
         c = json.loads( str(file.read()))
-        print (c)  
+        #print(c)
+        for attrs in c:   
+            print ('sitio: \t',attrs['sitio'], '\t numero de consultas :', attrs['contador'])  
         file.close()
         return c
     except:
@@ -149,7 +173,7 @@ def addContadorJson(sitio):
     CONTADOR.append( {"sitio": sitio, "contador":  0})
     #print(CONTADOR)
 
-def grabarContador():
+def grabarContador():   
 # funcion que guarda los usuarios en un archivo de texto json
     print('grabando contador')
     arch = open(archivo_contador, "w")
@@ -169,10 +193,25 @@ def incrementarContador(destino):
     print(CONTADOR)
 
 #PROCESOS GRAFOS
+def agregaNodoUsuario():
+#funcion para agregar carreteras para usuarios
+    try:
+        etiqueta = str.upper(input('Ingrese Nombre del Sitio Turistico:'))
+        #buscamos si la etiqueta ya existe en el grafo, si no existe tiene que sacar un error porque no existe la ruta
+        if buscaSitio(etiqueta) == True:
+          rutaMasCorta()
+        else:
+            print("no existe el sitio")
+    except ValueError:
+        print("No es un dato valido")
+        salvarLog(usr,'error: ha ingresado un dato no valido.')
+
+
+
 
 def rutaMasCorta():
-    origen = str.upper(input('Ingrese Nodo Origen:'))
-    destino = str.upper(input('Ingrese Nodo Destino:'))
+    origen = str.upper(input('Ingrese  lugar de partida Origen:'))
+    destino = str.upper(input('Ingrese lugar de Destino:'))
     incrementarContador(destino)
     path = nx.shortest_path(G, source=origen, target=destino, weight=None, method='dijkstra')
     print ('ruta mas corta: ',path,' con un total de sitios a recorrer: ', len(path))
@@ -186,6 +225,7 @@ def rutaMasCorta():
             print('en esta ruta hay una alerta')
             print('ruta: ',path[x], path[x + 1],' kilometros: ' ,G[path[x]][path[x + 1]]["weight"])
             print('*****************************')
+            
         print('ruta: ',path[x], path[x + 1],' kilometros: ' ,G[path[x]][path[x + 1]]["weight"])
         kms = kms + G[path[x]][path[x + 1]]["weight"]
         #creamos ruta 
@@ -213,9 +253,8 @@ def agregarCarreteraBandera():
     try:
         origen = str.upper(input('Ingrese sitio origen:'))
         destino = str.upper(input('Ingrese sitio destino:'))
-        peso = VALORBANDERA#int(input('Ingrese la distancia en kilometros:'))
-        G.add_edge(origen,destino,weight = peso)
-        
+        peso = VALORBANDERA  #int(input('Ingrese la distancia en kilometros:'))
+        G.add_edge(origen,destino,weight = peso)     
     except ValueError:
         print("No es un nummero valido")
 
@@ -234,7 +273,6 @@ def verGrafo():
     print(G.nodes())
     print(G.edges(data=True))
     print(labels)
-   
     nx.draw(G,with_labels=True)
     plt.savefig("graph.png")
     plt.show()
@@ -245,9 +283,8 @@ def borrarCarretera():
         origen = str.upper(input('Ingrese Nodo Origen:'))
         destino = str.upper(input('Ingrese Nodo Destino:'))
         peso = int(input('Ingrese peso del kilometros:'))
-       # G.remove_edge(origen,destino,weight = peso)
+        #solamente se quita la arista pero no el nodo porque puede tener dependencia o otras carreteras. 
         G.remove_edge(origen,destino)
-        G.remove_node(destino)
         salvarGrafos()
     except ValueError:
         print("No es un nummero valido")
@@ -286,26 +323,26 @@ def cargaArchivoGrafos():
         Lines = file1.readlines()
         for line in Lines:
             x = line.replace('\n','').split(',')
-            print(x)
+         #   print(x)
             if (len(x)>0):
                 #print(line,x[0],x[1],x[2])
-                G.add_edge(x[0],x[1],weight = int(x[2]))
-                    
+                G.add_edge(x[0],x[1],weight = int(x[2]))            
     except:
         print('hay un problema con el archivo de grafos')
        # salvarLog(usr,'error: existe un problema con el archivo de grafos.')
 
 
 
+   
+
 #void main()
 if __name__ == '__main__':
     print("starting")
-    usuarios = leerDataUsr()#cargamos usuarios
+    usuarios = leerDataUsr() #cargamos usuarios
     CONTADOR = leerDataContador()
     cargaArchivoGrafos()#cargamos grafos
     usr = str(input('Ingrese usuario:'))
     pwd = str(input('Ingrese password:'))
-    
     if ((usr == usuarioAdmin) and (pwd == passwordAdmin)):
         menuAdmin()
     else:
