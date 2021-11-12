@@ -67,10 +67,10 @@ def leerDataUsr():
 def addUserJson():
 #funcion que agrega un usuario 
     usr = str(input('Ingrese nonbre del usuario:'))
-    pwd = str(input('Ingrese password:'))
-    usuarios.append( {"usuario": usr, "password": pwd, "tipo": "1"})
-    print(usuarios)
+    pwd = str(input('Ingrese password:')) 
     if ( buscaUsuario(usr,pwd) == False ):
+        usuarios.append( {"usuario": usr, "password": pwd, "tipo": "1"})
+        print(usuarios)
         grabarUsuarios()
     else:
         print('usuario ya existe')
