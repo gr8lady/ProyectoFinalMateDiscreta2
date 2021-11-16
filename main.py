@@ -20,6 +20,29 @@ labels = {}
 
 VALORBANDERA = 1000000
 CONTADOR = []
+
+def verGrafo():
+    print(G.nodes())
+    print(G.edges(data=True))
+    print(labels)
+    nx.draw(G,with_labels=True)
+    plt.savefig("graph.png")
+    plt.show()
+
+
+def borrarCarretera():
+    try:
+        origen = str.upper(input('Ingrese Nodo Origen:'))
+        destino = str.upper(input('Ingrese Nodo Destino:'))
+      #  peso = int(input('Ingrese peso del kilometros:'))  no se necesita el peso para eliminar la arista
+        #solamente se quita la arista pero no el nodo porque puede tener dependencia o otras carreteras. 
+        G.remove_edge(origen,destino)
+        salvarGrafos()
+    except ValueError:
+        print("No es un nummero valido")
+        salvarLog(usr,'error: ha ingresado un dato no valido.')
+
+
 def salvarGrafos():
     print('salvando grafos')
     g = G.edges(data=True)
