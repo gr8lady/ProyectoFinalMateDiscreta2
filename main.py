@@ -21,6 +21,16 @@ labels = {}
 VALORBANDERA = 1000000
 CONTADOR = []
 
+def verGrafo():
+    print(G.nodes())
+    print(G.edges(data=True))
+    print(labels)
+    nx.draw(G,with_labels=True)
+    plt.savefig("graph.png")
+    plt.show()
+
+
+
 def borrarCarretera():
     try:
         origen = str.upper(input('Ingrese Nodo Origen:'))
@@ -58,6 +68,74 @@ def cargaArchivoGrafos():
                 G.add_edge(x[0],x[1],weight = int(x[2]))
     except:
         print('hay un problema con el archivo de grafos')
+
+
+def agregarCarretera():
+    try:
+        origen = str.upper(input('Ingrese sitio origen:'))
+        destino = str.upper(input('Ingrese sitio destino:'))
+        peso = int(input('Ingrese la distancia en kilometros:'))
+        G.add_edge(origen,destino,weight = peso)
+        salvarGrafos() 
+    except ValueError:
+        print("No es un nummero valido")
+
+
+def agregarCarreteraBandera():
+    try:
+        origen = str.upper(input('Ingrese sitio origen:'))
+        destino = str.upper(input('Ingrese sitio destino:'))
+        peso = VALORBANDERA  #int(input('Ingrese la distancia en kilometros:'))
+        G.add_edge(origen,destino,weight = peso)    
+        salvarGrafos() 
+    except ValueError:
+        print("No es un nummero valido")
+
+
+def agregaNodo():
+    try:
+        etiqueta = str.upper(input('Ingrese Nombre del Sitio Turistico:'))
+        G.add_node(etiqueta)
+        addContadorJson(etiqueta)
+        grabarContador()
+    except ValueError:
+        print("No es un dato valido")
+        salvarLog(usr,'error: ha ingresado un dato no valido.')
+
+
+def rutaMasCorta():
+    origen = str.upper(input('Ingrese  lugar de partida Origen:'))
+    destino = str.upper(input('Ingrese lugar de Destino:'))
+    incrementarContador(destino)
+    try:  # esta es una excepcion por si la ruta no existe, o el nodo no tiene carretera
+        path = nx.shortest_path(G, source=origen, target=destino, weight=None, method='dijkstra')
+        print ('ruta mas corta: ',path,' con un total de sitios a recorrer: ', len(path))
+        salvarLog(usr,'info: se ha mostrado la ruta mas corta.')
+        kms = 0
+        G2 = nx.Graph()
+        alerta = False;
+        for x in range(len(path)-1):
+            if (G[path[x]][path[x + 1]]["weight"] == VALORBANDERA):
+                print('*****************************')
+                print('en esta ruta hay una alerta')
+                print('ruta: ',path[x], path[x + 1],' kilometros: ' ,G[path[x]][path[x + 1]]["weight"])
+                print('*****************************')
+            print('ruta: ',path[x], path[x + 1],' kilometros: ' ,G[path[x]][path[x + 1]]["weight"])
+            kms = kms + G[path[x]][path[x + 1]]["weight"]
+        #sumamos los kilometros con la ruta total
+            G2.add_edge(path[x],path[x + 1],weight = G[path[x]][path[x + 1]]["weight"])
+        print('kilometros totales a recorrer: ',kms)
+        salvarLog(usr,'info: se han mostrado los kilometros a recorrer.')
+        #mostramos la ruta mas corta 
+        nx.draw(G2,with_labels=True)
+        plt.savefig("graph2.png")
+        plt.show() 
+    except  nx.exception.NetworkXNoPath:
+        print('no existe ruta entre: ', origen, ' ',destino)
+   
+            
+
+
 
 #void main()
 if __name__ == '__main__':
