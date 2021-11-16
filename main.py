@@ -21,6 +21,43 @@ labels = {}
 VALORBANDERA = 1000000
 CONTADOR = []
 
+def borrarCarretera():
+    try:
+        origen = str.upper(input('Ingrese Nodo Origen:'))
+        destino = str.upper(input('Ingrese Nodo Destino:'))
+      #  peso = int(input('Ingrese peso del kilometros:'))  no se necesita el peso para eliminar la arista
+        #solamente se quita la arista pero no el nodo porque puede tener dependencia o otras carreteras. 
+        G.remove_edge(origen,destino)
+        salvarGrafos()
+    except ValueError:
+        print("No es un nummero valido")
+        salvarLog(usr,'error: ha ingresado un dato no valido.')
+
+
+def salvarGrafos():
+    print('salvando grafos')
+    g = G.edges(data=True)
+    #print(g)
+    arch = open(archivo_grafos, "w")
+    for n in g:
+        origen = n[0]
+        destino = n[1]
+        peso = n[2]['weight']
+        arch.write(origen + ',' + destino + ',' + str(peso) + '\n')
+    arch.close()     
+
+def cargaArchivoGrafos():
+    try:
+        file1 = open(archivo_grafos, 'r')
+        Lines = file1.readlines()
+        for line in Lines:
+            x = line.replace('\n','').split(',')
+            print(x)
+            if (len(x)>0):
+                #print(line,x[0],x[1],x[2])
+                G.add_edge(x[0],x[1],weight = int(x[2]))
+    except:
+        print('hay un problema con el archivo de grafos')
 
 #void main()
 if __name__ == '__main__':
