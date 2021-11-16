@@ -21,6 +21,44 @@ labels = {}
 VALORBANDERA = 1000000
 CONTADOR = []
 
+def leerDataContador():
+    #leer json con el data de estadisticas
+    try:
+        file = open(archivo_contador,mode='r')
+        c = json.loads( str(file.read()))
+        #print(c)
+        for attrs in c:   
+            print ('sitio: \t',attrs['sitio'], '\t numero de consultas :', attrs['contador'])  
+        file.close()
+        return c
+    except:
+        print('no hay archivo de contador')
+        return []
+
+def addContadorJson(sitio):
+#funcion que agrega un usuario 
+    CONTADOR.append( {"sitio": sitio, "contador":  0})
+    #print(CONTADOR)
+
+def grabarContador():   
+# funcion que guarda los usuarios en un archivo de texto json
+    print('grabando contador')
+    arch = open(archivo_contador, "w")
+    arch.write(str(CONTADOR).replace("'",'\"'))
+    arch.close()   
+
+def incrementarContador(destino):
+#buscamos los usuarios en el archivo cargando el json
+    for attrs in CONTADOR:
+        if (attrs['sitio'] == destino):
+            print('encontrado')
+            #encontrado = True
+            x = attrs['contador']
+            x = x + 1
+            attrs['contador']  = x
+            break
+    print(CONTADOR)
+
 def verGrafo():
     print(G.nodes())
     print(G.edges(data=True))
@@ -28,7 +66,6 @@ def verGrafo():
     nx.draw(G,with_labels=True)
     plt.savefig("graph.png")
     plt.show()
-
 
 
 def borrarCarretera():
@@ -42,7 +79,6 @@ def borrarCarretera():
     except ValueError:
         print("No es un nummero valido")
         salvarLog(usr,'error: ha ingresado un dato no valido.')
-
 
 def salvarGrafos():
     print('salvando grafos')
@@ -80,7 +116,6 @@ def agregarCarretera():
     except ValueError:
         print("No es un nummero valido")
 
-
 def agregarCarreteraBandera():
     try:
         origen = str.upper(input('Ingrese sitio origen:'))
@@ -101,7 +136,6 @@ def agregaNodo():
     except ValueError:
         print("No es un dato valido")
         salvarLog(usr,'error: ha ingresado un dato no valido.')
-
 
 def rutaMasCorta():
     origen = str.upper(input('Ingrese  lugar de partida Origen:'))
