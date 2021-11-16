@@ -20,7 +20,30 @@ labels = {}
 
 VALORBANDERA = 1000000
 CONTADOR = []
+def salvarGrafos():
+    print('salvando grafos')
+    g = G.edges(data=True)
+    #print(g)
+    arch = open(archivo_grafos, "w")
+    for n in g:
+        origen = n[0]
+        destino = n[1]
+        peso = n[2]['weight']
+        arch.write(origen + ',' + destino + ',' + str(peso) + '\n')
+    arch.close()     
 
+def cargaArchivoGrafos():
+    try:
+        file1 = open(archivo_grafos, 'r')
+        Lines = file1.readlines()
+        for line in Lines:
+            x = line.replace('\n','').split(',')
+            print(x)
+            if (len(x)>0):
+                #print(line,x[0],x[1],x[2])
+                G.add_edge(x[0],x[1],weight = int(x[2]))
+    except:
+        print('hay un problema con el archivo de grafos')
 
 #void main()
 if __name__ == '__main__':
