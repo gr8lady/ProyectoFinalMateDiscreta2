@@ -132,11 +132,7 @@ def rutaMasCorta():
         plt.show() 
     except  nx.exception.NetworkXNoPath:
         print('no existe ruta entre: ', origen, ' ',destino)
-   
-            
-
-
-
+        
 #void main()
 if __name__ == '__main__':
     print("starting")
