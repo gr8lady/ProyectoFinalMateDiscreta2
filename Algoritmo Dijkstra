@@ -1,0 +1,162 @@
+namespace PruebaDijkstra
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            //Inicio modificación, borras todo hasta el fin
+            int[] Numeros;
+            int cont2 = 3;
+            string x0 = "";
+            string x1 = "";
+            string x2 = "";
+            int numVertices = 0, cont = 0;
+            int numVerticeInicio = 0;
+            int numVerticeFin = 0;
+            string[] Lineas, Sincom, MSinCom;
+            char coma = ',';
+            string UbicacionArchivo;
+
+            Console.WriteLine("Algoritmo de Dijkstra");
+            Console.WriteLine("Algoritmo para distancia");
+            //Código para leer los primeros datos 
+
+            UbicacionArchivo = @"proyecto.txt";
+            Lineas = File.ReadAllLines(UbicacionArchivo);
+            x0 = Lineas[0];
+            x1 = Lineas[1];
+            x2 = Lineas[2];         
+            numVertices = Convert.ToInt32(x0.Substring(0, 1));
+            numVerticeInicio = Convert.ToInt32(x1.Substring(0, 1));
+            numVerticeFin = Convert.ToInt32(x2.Substring(0, 1));            
+            string[] infografos = new string[(numVertices + 3)];
+            //Código para leer la cantidad de vertices/aristas según haya sigo ingresado
+            {
+                for (int i = 0; i < (numVertices + 3); i++)
+                {
+                    infografos[i] = Lineas[i];
+                }
+                Sincom = new string[infografos.Length];
+                Numeros = new int[infografos.Length];
+                //Se quitan las comas
+                for (int i = 0; i < infografos.Length; i++)
+                {
+                    string Lactual = infografos[i];
+                    MSinCom = Lactual.Split(coma);
+                    for (int j = 0; j < MSinCom.Count(); j++)
+                    {
+                        Sincom[i] += MSinCom[j];
+                    }
+                }
+                //Verifica que los datos en el txt no sean espacios en blanco
+                for (int i = 3; i < infografos.Length; i++)
+                {
+                    if (infografos[i].Length != 7)
+                    {
+                        Console.WriteLine("El grafo no puede ser un grafo no conexó, revise la linea: " + (i + 1));
+                    }
+                }
+
+                for (int i = 0; i < infografos.Length; i++)
+                {
+                    try
+                    {
+                        Numeros[cont] = Convert.ToInt32(Sincom[i]);
+                    }
+                    catch
+                    {
+                        Console.WriteLine("Los valores del txt deben de ser numeros enteros y digitos numericos. Tiene el error en la linea: " + (i + 1));
+                        Thread.Sleep(4000);
+                        Environment.Exit(0);
+                    }
+                    cont++;
+                }
+                //Verifica que el grafo no sea no conexo
+            }
+            //Variables para almacenar cada dato del grafo
+            int numgrafos = (numVertices + 10);
+            int numgrafosmatriz = (numVertices + 3);
+            int[] VerticesInicales = new int[numgrafos];
+            int[] VerticesFinales = new int[numgrafos];
+            int[] distancias = new int[numgrafos];
+            int[] costos = new int[numgrafos];
+            for (int i = 3; i < numgrafosmatriz; i++)
+            {
+                VerticesInicales[i] = Convert.ToInt32(infografos[i].Substring(0, 1));
+                VerticesFinales[i] = Convert.ToInt32(infografos[i].Substring(2, 1));
+                distancias[i] = Convert.ToInt32(infografos[i].Substring(4, 1));
+                costos[i] = Convert.ToInt32(infografos[i].Substring(6, 1));
+            }
+            //Verificacion para que no sean grafos no conexos
+            for (int i = 3; i < infografos.Length; i++)
+            {
+                if (distancias[i] == 0 && costos[i] == 0)
+                {
+                    Console.WriteLine("Lo lamento, el grafo es un grafo no conexo, porfavor corrija su erros en la linea: " + (i + 1));
+                    Thread.Sleep(4000);
+                    Environment.Exit(0);
+                }
+            }
+            //FIN MODIFICACIÓN, hasta aquí eliminas y sustiuis el código
+
+            int inicio = 0;
+            int final = 0;
+            int distancia = 0;
+            int n = 0;
+            int m = 0;
+            int cantNodos = numVertices;
+            string dato = "";
+            int actual = 0;
+            int columna = 0;
+            //Creación del grafo
+            CGrafo miGrafo = new CGrafo(cantNodos);
+            for (int i = 3; i < numgrafosmatriz; i++)
+            {
+                miGrafo.AdicionaArista(VerticesInicales[i], VerticesFinales[i], distancias[i]);                
+            }                      
+            miGrafo.MuestraAdyacencia();
+            Console.WriteLine("\n");
+            inicio = Convert.ToInt32(numVerticeInicio);           
+            final = Convert.ToInt32(numVerticeFin);
+
+            // Creamos la tabla
+            // 0 - Visitado
+            // 1 - Distancia
+            // 2 - Previo
+
+            int[,] tabla = new int[cantNodos, 3];
+
+            //incializamos la tabla
+            for (n = 0; n < cantNodos; n++)
+            {
+                tabla[n, 0] = 0;
+                tabla[n, 1] = int.MaxValue;
+                tabla[n, 2] = 0;
+            }
+            tabla[inicio, 1] = 0;            
+            //inicio Dijkstra
+            actual = inicio;
+            do
+            {
+                tabla[actual, 0] = 1;
+
+                for(columna = 0; columna < cantNodos; columna++)
+                {
+                    //Buscamos a quien se dirige
+                    if (miGrafo.ObtenAdyacencia(actual, columna) != 0)
+                    {
+                        //Calculamos las distancias
+                        distancia = miGrafo.ObtenAdyacencia(actual, columna) + tabla[actual, 1];
+                        //Colocamos las distancias 
+                        if (distancia < tabla[columna, 1])
+                        {
+                            tabla[columna, 1] = distancia;
+
+                            //Colocamos la información del vértice anterior
+                            tabla[columna, 2] = actual;
+                        }
+
+                    }
+                }
+
+}
