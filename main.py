@@ -34,10 +34,11 @@ def leerDataContador():
     except:
         print('no hay archivo de contador')
         return []
-
-def addContadorJson(sitio):
+def addContadorJson (sitio):
 #funcion que agrega un usuario 
+
     CONTADOR.append( {"sitio": sitio, "contador":  0})
+    
     #print(CONTADOR)
 
 def grabarContador():   
