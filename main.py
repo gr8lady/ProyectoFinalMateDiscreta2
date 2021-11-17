@@ -20,6 +20,28 @@ labels = {}
 
 VALORBANDERA = 1000000
 CONTADOR = []
+def leerDataUsr():
+    #leer json con usuarios
+    try:
+        file = open(archivo_usuarios,mode='r')
+        usuarios = json.loads( str(file.read()))
+      #  print (usuarios)  
+        file.close()
+        return usuarios
+    except:
+        print('no hay archivo de usuarios o usuarios todavia')
+        return []
+
+def addUserJson():
+#funcion que agrega un usuario 
+    usr = str(input('Ingrese nonbre del usuario:'))
+    pwd = str(input('Ingrese password:')) 
+    if ( buscaUsuario(usr,pwd) == False ):
+        usuarios.append( {"usuario": usr, "password": pwd, "tipo": "1"})
+        print(usuarios)
+        grabarUsuarios()
+    else:
+        print('usuario ya existe')
 
 def grabarUsuarios():
 # funcion que guarda los usuarios en un archivo de texto json
