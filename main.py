@@ -118,6 +118,7 @@ def agregarCarretera():
 
 def agregarCarreteraBandera():
     try:
+        
         origen = str.upper(input('Ingrese sitio origen:'))
         destino = str.upper(input('Ingrese sitio destino:'))
         peso = VALORBANDERA  #int(input('Ingrese la distancia en kilometros:'))
