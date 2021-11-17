@@ -70,6 +70,7 @@ def verGrafo():
 
 def borrarCarretera():
     try:
+        
         origen = str.upper(input('Ingrese Nodo Origen:'))
         destino = str.upper(input('Ingrese Nodo Destino:'))
       #  peso = int(input('Ingrese peso del kilometros:'))  no se necesita el peso para eliminar la arista
