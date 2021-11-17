@@ -20,7 +20,6 @@ labels = {}
 
 VALORBANDERA = 1000000
 CONTADOR = []
-
 def leerDataContador():
     #leer json con el data de estadisticas
     try:
@@ -34,6 +33,7 @@ def leerDataContador():
     except:
         print('no hay archivo de contador')
         return []
+
 def addContadorJson (sitio):
 #funcion que agrega un usuario 
 
