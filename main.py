@@ -140,11 +140,11 @@ def agregaNodo():
         print("No es un dato valido")
         salvarLog(usr,'error: ha ingresado un dato no valido.')
 
-def rutaMasCorta():
+def rutaMasCorta(): 
     origen = str.upper(input('Ingrese  lugar de partida Origen:'))
     destino = str.upper(input('Ingrese lugar de Destino:'))
     incrementarContador(destino)
-    try:  # esta es una excepcion por si la ruta no existe, o el nodo no tiene carretera
+    try:  # esta es una excepcion en caso de una ruta inexistente o nodo sin carrera
         path = nx.shortest_path(G, source=origen, target=destino, weight=None, method='dijkstra')
         print ('ruta mas corta: ',path,' con un total de sitios a recorrer: ', len(path))
         salvarLog(usr,'info: se ha mostrado la ruta mas corta.')
@@ -154,8 +154,8 @@ def rutaMasCorta():
         for x in range(len(path)-1):
             if (G[path[x]][path[x + 1]]["weight"] == VALORBANDERA):
                 print('*****************************')
-                print('en esta ruta hay una alerta')
-                print('ruta: ',path[x], path[x + 1],' kilometros: ' ,G[path[x]][path[x + 1]]["weight"])
+                print('En esta ruta hay una alerta')
+                print('Ruta: ',path[x], path[x + 1],' kilometros: ' ,G[path[x]][path[x + 1]]["weight"])
                 print('*****************************')
             print('ruta: ',path[x], path[x + 1],' kilometros: ' ,G[path[x]][path[x + 1]]["weight"])
             kms = kms + G[path[x]][path[x + 1]]["weight"]
@@ -168,7 +168,7 @@ def rutaMasCorta():
         plt.savefig("graph2.png")
         plt.show() 
     except  nx.exception.NetworkXNoPath:
-        print('no existe ruta entre: ', origen, ' ',destino)
+        print('No existe ruta entre: ', origen, ' ',destino)
         
 #void main()
 if __name__ == '__main__':
