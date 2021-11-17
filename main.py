@@ -20,6 +20,17 @@ labels = {}
 
 VALORBANDERA = 1000000
 CONTADOR = []
+
+def buscaSitio(sitioBuscar):
+    print('buscando sitio turistico', sitioBuscar)
+    encontrado = False
+    for attrs in CONTADOR:
+        if (attrs['sitio'] == sitioBuscar):
+            print('encontrado')
+            encontrado = True
+            break
+    return encontrado
+
 def leerDataContador():
     #leer json con el data de estadisticas
     try:
