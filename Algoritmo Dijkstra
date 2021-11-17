@@ -109,7 +109,8 @@ namespace PruebaDijkstra
             int actual = 0;
             int columna = 0;
             //Creación del grafo
-            CGrafo miGrafo = new CGrafo(cantNodos);
+            
+            CGrafo miGrafo = new CGrafo( cantNodos );
             for (int i = 3; i < numgrafosmatriz; i++)
             {
                 miGrafo.AdicionaArista(VerticesInicales[i], VerticesFinales[i], distancias[i]);                
@@ -153,6 +154,7 @@ namespace PruebaDijkstra
                             tabla[columna, 1] = distancia;
 
                             //Colocamos la información del vértice anterior
+                            
                             tabla[columna, 2] = actual;
                         }
 
