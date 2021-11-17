@@ -21,6 +21,14 @@ labels = {}
 VALORBANDERA = 1000000
 CONTADOR = []
 
+def grabarUsuarios():
+# funcion que guarda los usuarios en un archivo de texto json
+    print('grabando usuarios cuando hay algun cambio')
+    print(str(usuarios))
+    arch = open(archivo_usuarios, "w")
+    arch.write(str(usuarios).replace("'",'\"'))
+    arch.close()  
+
 def buscaSitio(sitioBuscar):
     print('buscando sitio turistico', sitioBuscar)
     encontrado = False
