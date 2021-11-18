@@ -1,0 +1,79 @@
+def _dijkstra_multisource(
+    G, sources, weight, pred=None, paths=None, cutoff=None, target=None
+):
+		
+	Busca si es dirigido o si tiene nodos sucesores
+	G_succ = G._succ if G.is_directed() else G._adj  
+    
+	aca se implementa una cola, python tiene funciones predefinidas para pilas y colas para mas detalles se puede ver el siguiente link  https://docs.python.org/3/library/heapq.html
+	
+	push es que inserta un valor en la cola
+    push = heappush  
+	
+	pop saca el valor mas pequeño de la data
+    pop = heappop
+	
+    En Python los diccionarios son utilizados para guardar data en pares llave:valor , la cual esta ordenada  
+	https://www.w3schools.com/python/python_dictionaries.asp 
+    dist = {}  # dictionary of final distances
+    seen = {}
+	
+	aca en el codigo se explica que hay una franja que es un arreglo de 3 tuplas, distancia, c y el nodo donde c es un numero para evitar comparar nodos
+    # fringe is heapq with 3-tuples (distance,c,node)
+    # use the count c to avoid comparing nodes (may not be able to)
+    c = count()
+    fringe = []
+    
+	En esta parte del  codigo empieza el ciclo for donde se meten las variables en la cola, en la clase es lo que se muestra como T donde se meten
+	todos los vertices para el analisis 
+	for source in sources:
+        seen[source] = 0
+        push(fringe, (0, next(c), source))
+	aca entramos en el ciclo que se muestra en la clase mientras (Z pertenece a T)
+    while fringe:
+	En esta parte del codigo sacamos el menor valor de la cola haciendo un pop
+        (d, _, v) = pop(fringe)
+		aca se busca si el valor v ya ha sido evaluada si ha sido evaluada sigue 
+        if v in dist:
+            continue  # already searched this node.
+		aca se analiza si el sub nodo tiene el valor del nodo objetivo, que en este caso es target pero en la clase lo vemos como z
+        dist[v] = d
+        if v == target:
+		En esta parte del codigo si ya fue incluido en la cola entonces se cierra el while y no se continua
+            break
+		En esta parte del codigo se hace un recorrido y se evalua el costo del camino, y va haciendo las sumas 	
+        for u, e in G_succ[v].items():
+		en esta parte se tiene una funcion que se llama peso, se envia como parametros los nodos 
+            cost = weight(v, u, e) 
+		si el costo es ninguno continua, es el equivalente al valor infinito que vimos en clase
+            if cost is None:
+                continue
+		en esta parte suma los valores de la distancia
+            vu_dist = dist[v] + cost
+		este if es si por ejemplo existe un numero maximo de nodos a recorrer 
+            if cutoff is not None:
+                if vu_dist > cutoff:
+                    continue
+            if u in dist:
+                u_dist = dist[u]
+		en esta parte del codigo se verifica si las suma de las distancias son positivas, si no regresa un error
+                if vu_dist < u_dist:
+                    raise ValueError("Contradictory paths found:", "negative weights?")
+                elif pred is not None and vu_dist == u_dist:
+                    pred[u].append(v)
+		en esta parte del codigo se hizo la evaluacion de si z ya se ha evaluado, de no ser asi se continua, y el nodo evaluado se guarda en la cola 
+            elif u not in seen or vu_dist < seen[u]:
+                seen[u] = vu_dist
+                push(fringe, (vu_dist, next(c), u))
+                if paths is not None:
+                    paths[u] = paths[v] + [u]
+		en esta parte del codigo de evalua si existe un predecesor si no se agrega el nodo destino sino se le da un append a la cola para la siguiente evaluacion
+                if pred is not None:
+                    pred[u] = [v]
+            elif vu_dist == seen[u]:
+                if pred is not None:
+                    pred[u].append(v)
+
+    # The optional predecessor and path dictionaries can be accessed
+    # by the caller via the pred and paths objects passed as arguments.
+    return dist
