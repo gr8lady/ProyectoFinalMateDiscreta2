@@ -1,2 +1,2 @@
 # ProyectoFinalMateDiscreta2
-proyecto final de matematica discreta
+proyecto final de matematica discreta II
